@@ -1,112 +1,111 @@
-// console.log('services');
+
 angular.module('userServices',[])
 
 .factory('User',function($http){
     userFactory={};
 
     userFactory.create = function(regData){
-        return $http.post('/api/users',regData);
+        return $http.post('/api/v1/members/register',regData);
     };
 
-    // userFactory.checkUsername = function(regData){
-    //     return $http.post('/api/checkusername',regData);
-    // },
-    // userFactory.checkEmail = function(regData){
-    //     return $http.post('/api/checkemail',regData);
-    // }
+    
+    
+    
+    
+    
+    
 
     userFactory.activateAccount = function(token){
-        return $http.put('/api/activate/' + token);
+        return $http.put('/api/v1/members/activate/' + token);
     };
 
     userFactory.checkCredentials = function(loginData){
-        //console.log(logData);
-        return $http.post('/api/resend',loginData);
+        
+        return $http.post('/api/v1/members/resend',loginData);
     };
 
     userFactory.resendLink = function(username){
-        //console.log(logData);
-        return $http.put('/api/sendlink',username);
+        
+        return $http.put('/api/v1/members/sendlink',username);
     };
 
     userFactory.resetUsername = function(email){
-        //console.log(logData);
-        return $http.post('/api/resetusername',email);
+        
+        return $http.post('/api/v1/members/resetusername',email);
     };
 
     userFactory.resetPassword = function(email){
-        console.log(email);
-        return $http.post('/api/resetpassword',email);
+        return $http.post('/api/v1/members/resetpassword',email);
     };
 
-    // change password
+    
     userFactory.changepassword = function(logObj) {
-        return $http.put('/api/changepassword', logObj);
+        return $http.put('/api/v1/members/changepassword', logObj);
     };
 
     userFactory.donaterawfood = function(rawfoodData){
-        //console.log(logData);
-        return $http.post('/api/donaterawfood',rawfoodData);
+        
+        return $http.post('/api/v1/members/donaterawfood',rawfoodData);
     };
 
     userFactory.donateCookedFood = function(foodData){
-        //console.log(logData);
-        return $http.post('/api/donateCookedFood',foodData);
+        
+        return $http.post('/api/v1/members/donateCookedFood',foodData);
     };
 
     userFactory.donaterequests = function(){
-        //console.log(logData);
-        return $http.get('/api/donaterequests');
+        
+        return $http.get('/api/v1/members/donaterequests');
     };
 
     userFactory.readdonaterequest = function (id) {
-        return $http.get('/api/readdonaterequest/'+id);
+        return $http.get('/api/v1/members/readdonaterequest/'+id);
     };
 
     userFactory.donators = function () {
-        return $http.get('/api/donators');
+        return $http.get('/api/v1/members/donators');
     };
 
     userFactory.receivers = function () {
-        return $http.get('/api/receivers');
+        return $http.get('/api/v1/members/receivers');
     };
 
     userFactory.volunteers = function () {
-        return $http.get('/api/volunteers');
+        return $http.get('/api/v1/members/volunteers');
     };
 
     userFactory.addtocart = function (id) {
-        //console.log(id);
-        return $http.post('/api/addtocart/'+ id);
+        
+        return $http.post('/api/v1/members/addtocart/'+ id);
     };
 
     userFactory.cart = function () {
-        return $http.get('/api/cart');
+        return $http.get('/api/v1/members/cart');
     };
 
     userFactory.addnewproduct = function (Data) {
-        return $http.post('/api/addnewproduct',Data);
+        return $http.post('/api/v1/members/addnewproduct',Data);
     };
 
     userFactory.displayproduct = function(){
-      return $http.get('/api/displayproduct');
+      return $http.get('/api/v1/members/displayproduct');
     };
 
     userFactory.accept = function (id) {
-        //console.log(id);
-        return $http.put('/api/accept/'+id);
+        
+        return $http.put('/api/v1/members/accept/'+id);
     };
 
     userFactory.searchAccepted = function () {
-        return $http.get('/api/searchAccepted');
+        return $http.get('/api/v1/members/searchAccepted');
     };
 
     userFactory.removeitem = function (id) {
-        return $http.post('/api/removeitem/'+id);
+        return $http.post('/api/v1/members/removeitem/'+id);
     };
 
     userFactory.clearcart = function () {
-        return $http.post('/api/clearcart');
+        return $http.post('/api/v1/members/clearcart');
     };
     
 

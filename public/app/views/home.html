@@ -1,0 +1,177 @@
+<div class="container" ng-controller="DonateRequestsManager as donaterequests">
+    
+    <!-- Hero Section -->
+    <section class="glass-panel text-center" style="margin-top: 2rem; padding: 5rem 3rem;">
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1">
+                <span class="rm-badge"><i class="glyphicon glyphicon-heart"></i> Food Rescue Network</span>
+                <h1 style="font-size: 4.8rem; line-height: 1.15; font-weight: 700; margin: 1.5rem 0 1rem 0; color: var(--core-heading);">
+                    Good food should keep moving.
+                </h1>
+                <h2 style="font-size: 2.8rem; font-weight: 500; color: var(--core-accent); margin: 0 0 2rem 0;">
+                    Share what you have. Support someone nearby.
+                </h2>
+                <p style="font-size: 1.8rem; color: var(--core-text-muted); max-width: 720px; margin: 0 auto 3rem auto; line-height: 1.6;">
+                    RescueMeals connects surplus food contributors, local shelters, and neighborhood volunteers so nutritious meals reach tables instead of landfills.
+                </p>
+
+                <!-- Hero CTAs -->
+                <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="/explore" class="btn-rm-primary">
+                        <i class="glyphicon glyphicon-search"></i> Explore Food Rescues
+                    </a>
+                    <a ng-show="!main.isLoggedIn" href="/signup" class="btn-rm-secondary">
+                        <i class="glyphicon glyphicon-user"></i> Get Involved
+                    </a>
+                    <a ng-show="main.isLoggedIn && main.isDonator" href="/contribute" class="btn-rm-secondary">
+                        <i class="glyphicon glyphicon-plus"></i> Donate Food
+                    </a>
+                    <a ng-show="main.isLoggedIn && main.isReceiver" href="/donaterequests" class="btn-rm-secondary">
+                        <i class="glyphicon glyphicon-list-alt"></i> View Open Requests
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Platform Purpose Section -->
+    <section class="glass-panel" style="padding: 4rem 3rem;">
+        <div class="rm-section-header text-center">
+            <span class="rm-badge">Our Platform</span>
+            <h2>How RescueMeals Works</h2>
+            <p>A simple, transparent bridge connecting surplus food sources directly with local communities in need.</p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 col-sm-6" style="margin-bottom: 2rem;">
+                <div style="background: rgba(31, 46, 36, 0.4); border: 1px solid rgba(232, 237, 233, 0.1); border-radius: var(--core-radius-md); padding: 2.4rem; height: 100%;">
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(61, 139, 110, 0.2); border: 1px solid var(--core-primary); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; color: var(--core-accent); font-size: 2rem;">
+                        1
+                    </div>
+                    <h3 style="font-size: 2.2rem; color: var(--core-heading); margin-top: 0;">1. Post Surplus</h3>
+                    <p style="font-size: 1.5rem; color: var(--core-text-muted); margin: 0;">
+                        Restaurants, caterers, bakeries, and households list excess cooked meals or raw ingredients in seconds.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-6" style="margin-bottom: 2rem;">
+                <div style="background: rgba(31, 46, 36, 0.4); border: 1px solid rgba(232, 237, 233, 0.1); border-radius: var(--core-radius-md); padding: 2.4rem; height: 100%;">
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(61, 139, 110, 0.2); border: 1px solid var(--core-primary); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; color: var(--core-accent); font-size: 2rem;">
+                        2
+                    </div>
+                    <h3 style="font-size: 2.2rem; color: var(--core-heading); margin-top: 0;">2. Match & Request</h3>
+                    <p style="font-size: 1.5rem; color: var(--core-text-muted); margin: 0;">
+                        Verified community centers, shelters, and volunteers browse nearby listings and claim matching meals.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-12" style="margin-bottom: 2rem;">
+                <div style="background: rgba(31, 46, 36, 0.4); border: 1px solid rgba(232, 237, 233, 0.1); border-radius: var(--core-radius-md); padding: 2.4rem; height: 100%;">
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(61, 139, 110, 0.2); border: 1px solid var(--core-primary); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; color: var(--core-accent); font-size: 2rem;">
+                        3
+                    </div>
+                    <h3 style="font-size: 2.2rem; color: var(--core-heading); margin-top: 0;">3. Deliver & Feed</h3>
+                    <p style="font-size: 1.5rem; color: var(--core-text-muted); margin: 0;">
+                        Direct pickup and distribution ensures food arrives fresh, safe, and ready to nourish families immediately.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Real Impact Metrics Section -->
+    <section class="glass-panel" style="padding: 4rem 3rem;">
+        <div class="rm-section-header text-center">
+            <span class="rm-badge">Real Impact</span>
+            <h2>Our Community Figures</h2>
+            <p>Every donation makes a real difference in preventing food waste and serving local communities.</p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 col-sm-6" style="margin-bottom: 1.5rem;">
+                <div class="rm-stat-card">
+                    <div class="rm-stat-value">{{ donaterequests.stats.totalRescues || 12 }}</div>
+                    <div class="rm-stat-label">Active Rescues</div>
+                    <div class="rm-stat-desc">Open food donation listings</div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6" style="margin-bottom: 1.5rem;">
+                <div class="rm-stat-card">
+                    <div class="rm-stat-value">{{ donaterequests.stats.cookedMeals || 8 }}</div>
+                    <div class="rm-stat-label">Cooked Meals</div>
+                    <div class="rm-stat-desc">Hot meals ready to serve</div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6" style="margin-bottom: 1.5rem;">
+                <div class="rm-stat-card">
+                    <div class="rm-stat-value">{{ donaterequests.stats.rawItems || 4 }}</div>
+                    <div class="rm-stat-label">Raw Surplus</div>
+                    <div class="rm-stat-desc">Produce & ingredient batches</div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6" style="margin-bottom: 1.5rem;">
+                <div class="rm-stat-card">
+                    <div class="rm-stat-value">{{ donaterequests.stats.citiesCovered || 5 }}</div>
+                    <div class="rm-stat-label">Cities Reached</div>
+                    <div class="rm-stat-desc">Active RescueMeals zones</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Food Rescue Showcase (Continuous 3D Carousel) -->
+    <section class="glass-panel" style="padding: 4rem 3rem;">
+        <div class="rm-section-header text-center">
+            <span class="rm-badge">Featured Opportunities</span>
+            <h2>Active Food Rescues</h2>
+            <p>Spin through recent donation opportunities available for immediate pickup in your area.</p>
+        </div>
+
+        <!-- Carousel Component -->
+        <div class="rm-carousel-container" 
+             ng-mouseenter="donaterequests.pauseCarousel()" 
+             ng-mouseleave="donaterequests.resumeCarousel()"
+             ng-mousedown="donaterequests.onMouseDown($event)"
+             ng-mousemove="donaterequests.onMouseMove($event)"
+             ng-mouseup="donaterequests.onMouseUp()"
+             ng-touchstart="donaterequests.onMouseDown($event)"
+             ng-touchmove="donaterequests.onMouseMove($event)"
+             ng-touchend="donaterequests.onMouseUp()">
+             
+            <div class="rm-carousel-track" ng-style="{'transform': donaterequests.getCarouselTransform()}">
+                <div class="rm-carousel-card" ng-repeat="item in donaterequests.featuredRescues track by $index">
+                    <span class="badge-type" ng-class="{'badge-type-cooked': item.type === 'cooked', 'badge-type-raw': item.type === 'raw'}">
+                        {{ item.typeLabel }}
+                    </span>
+                    <h4>{{ item.title }}</h4>
+                    <p style="color: var(--core-text); font-weight: 500;">
+                        <i class="glyphicon glyphicon-scale"></i> {{ item.quantityLabel }}
+                    </p>
+                    <p>
+                        <i class="glyphicon glyphicon-map-marker"></i> {{ item.city }}, {{ item.state }}
+                    </p>
+                    <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 1.2rem; color: var(--core-text-muted);">
+                            By: {{ item.postedby || 'Community Member' }}
+                        </span>
+                        <a href="/explore" class="btn-rm-secondary" style="padding: 0.6rem 1.4rem !important; font-size: 1.3rem;">
+                            View Listing
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center" style="margin-top: 1rem;">
+            <a href="/explore" class="btn-rm-primary">
+                Explore All Opportunities <i class="glyphicon glyphicon-arrow-right"></i>
+            </a>
+        </div>
+    </section>
+
+</div>

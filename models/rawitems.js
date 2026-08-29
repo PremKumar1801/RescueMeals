@@ -2,12 +2,12 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var validate = require('mongoose-validator');
 
-// Add location validators
+
 var cityValidator = [
     validate({
         validator: 'isLength',
         arguments: [2, 50],
-        message: 'City name should be between {ARGS[0]} and {ARGS[1]} characters'
+        message: 'Please provide a valid city name (between {ARGS[0]} and {ARGS[1]} characters).'
     })
 ];
 
@@ -15,7 +15,7 @@ var stateValidator = [
     validate({
         validator: 'isLength',
         arguments: [2, 50],
-        message: 'State name should be between {ARGS[0]} and {ARGS[1]} characters'
+        message: 'Please provide a valid state name (between {ARGS[0]} and {ARGS[1]} characters).'
     })
 ];
 
@@ -27,7 +27,7 @@ var rawitemsSchema = new Schema({
     quantity: {
         type: Number,
         required: true,
-        min: [1, 'Quantity must be at least 1']
+        min: [1, 'The quantity must be 1 or greater.']
     },
     unit: {
         type: String,
@@ -44,7 +44,7 @@ var rawitemsSchema = new Schema({
         required: true,
         validate: stateValidator
     },
-    // Add geocoding support for better location tracking
+    
     location: {
         type: {
             latitude: Number,
@@ -69,7 +69,7 @@ var rawitemsSchema = new Schema({
         type: String,
         default: 'none'
     },
-    // Add expiration date for food safety
+    
     expiryDate: {
         type: Date,
         required: false

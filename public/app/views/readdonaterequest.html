@@ -10,20 +10,20 @@
     <div class="alert alert-danger">{{readdonaterequest.errorMsg}}</div>
 </div>
 
-<div style="border: 2px solid white;border-radius: 2em;padding-left: 2em;padding-top: 1em;">
+<div class="rm-card" style="padding-left: 2em;padding-top: 1em;">
     <div class="row">
         <div class="col-sm-8">
-            <p style="color: white;font-size: 1.8em;"><b>Name</b>  :   {{readdonaterequest.name}} </p>
-            <p style="color: white;font-size: 1.8em;"> <b>Username</b> :   {{readdonaterequest.username}} </p>
-            <p style="color: white;font-size: 1.8em;"> <b>Email</b> :   {{readdonaterequest.email}} </p>
-            <p style="color: white;font-size: 1.8em;"> <b>Institute</b> :   {{readdonaterequest.institute}} </p>
-            <button type="button" class="btn btn-primary" ng-click="readdonaterequest.accept(readdonaterequest.id);">Accept Request</button>
+            <p class="text-light" style="font-size: 1.8em;"><b>Name</b>  :   {{readdonaterequest.name}} </p>
+            <p class="text-light" style="font-size: 1.8em;"> <b>Username</b> :   {{readdonaterequest.username}} </p>
+            <p class="text-light" style="font-size: 1.8em;"> <b>Email</b> :   {{readdonaterequest.email}} </p>
+            <p class="text-light" style="font-size: 1.8em;"> <b>Institute</b> :   {{readdonaterequest.institute}} </p>
+            <button type="button" class="btn btn-rm-primary" ng-click="readdonaterequest.accept(readdonaterequest.id);">Approve Request</button>
         </div>
         <div class="col-sm-4">
-            <p style="color: white;font-size: 1.8em;"><b>Meal </b>  :   {{readdonaterequest.meal}} </p>
-            <p style="color: white;font-size: 1.8em;"> <b>People </b> :   {{readdonaterequest.people}} </p>
-            <p style="color: white;font-size: 1.8em;"> <b>City</b> :   {{readdonaterequest.city}} </p>
-            <p style="color: white;font-size: 1.8em;"> <b>State</b> :   {{readdonaterequest.state}} </p>
+            <p class="text-light" style="font-size: 1.8em;"><b>Meal </b>  :   {{readdonaterequest.meal}} </p>
+            <p class="text-light" style="font-size: 1.8em;"> <b>People </b> :   {{readdonaterequest.people}} </p>
+            <p class="text-light" style="font-size: 1.8em;"> <b>City</b> :   {{readdonaterequest.city}} </p>
+            <p class="text-light" style="font-size: 1.8em;"> <b>State</b> :   {{readdonaterequest.state}} </p>
         </div>
     </div>
 </div>

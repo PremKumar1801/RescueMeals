@@ -1,9 +1,9 @@
 
 
 
-/*
- * domine
-================================================================================ */
+
+
+
 @font-face {
   font-family: "domine-regular";
   src: url("../fonts/domine/domine-regular-webfont.woff2") format("woff2"), url("../fonts/domine/domine-regular-webfont.woff") format("woff");
@@ -19,9 +19,9 @@
 }
 
 
-/*
- * metropolis
-================================================================================ */
+
+
+
 @font-face {
   font-family: "metropolis-bold";
   src: url("../fonts/metropolis/metropolis-bold-webfont.woff2") format("woff2"), url("../fonts/metropolis/metropolis-bold-webfont.woff") format("woff");

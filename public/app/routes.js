@@ -1,4 +1,4 @@
-//console.log("Testing routes");
+
 
 var app = angular.module('appRoutes',['ngRoute'])
 
@@ -6,20 +6,32 @@ var app = angular.module('appRoutes',['ngRoute'])
 	
 	$routeProvider
 
+	.when('/', {
+		templateUrl: 'app/views/home.html',
+		authenticated: false
+	})
+
+	.when('/explore', {
+		templateUrl: 'app/views/explore.html',
+		controller: 'DonateRequestsManager',
+		controllerAs: 'donaterequests',
+		authenticated: false
+	})
+
 	.when('/about',{
-		templateUrl:'/app/views/about.html',
+		templateUrl:'app/views/about.html',
         authenticated:false,
 	})
 
-	.when('/register',{
-		templateUrl:'/app/views/register.html',
-		controller:'regCtrl',
+	.when('/signup',{
+		templateUrl:'/app/views/signup.html',
+		controller:'RegistrationManager',
 		controllerAs: 'register',
 		authenticated:false,
 	})
 
-	.when('/login',{
-		templateUrl:'/app/views/login.html',
+	.when('/signin',{
+		templateUrl:'/app/views/signin.html',
         authenticated:false,
 	})
 
@@ -28,138 +40,145 @@ var app = angular.module('appRoutes',['ngRoute'])
         authenticated:true,
 	})
 
-	.when('/profile',{
-		templateUrl:'/app/views/profile.html',
+	.when('/overview',{
+		templateUrl:'/app/views/overview.html',
         authenticated:true,
 	})
 
 	.when('/facebook/:token',{
-		templateUrl:'/app/views/profile.html',
-		controller :'facebookCtrl',
+		templateUrl:'/app/views/overview.html',
+		controller :'FacebookManager',
 		controllerAs: 'facebook',
         authenticated:false
 	})
 
 	.when('/google/:token',{
-		templateUrl:'/app/views/profile.html',
-		controller :'googleCtrl',
+		templateUrl:'/app/views/overview.html',
+		controller :'GoogleManager',
 		controllerAs: 'google',
         authenticated:false
 	})
 
+	.when('/twitter/:token',{
+		templateUrl:'/app/views/overview.html',
+		controller :'TwitterManager',
+		controllerAs: 'twitter',
+        authenticated:false
+	})
+
 	.when('/googleerror',{
-		templateUrl:'/app/views/login.html',
-        controller :'googleCtrl',
+		templateUrl:'/app/views/signin.html',
+        controller :'GoogleManager',
         controllerAs: 'google',
         authenticated:false
 	})
 
 	.when('/activate/:token',{
 		templateUrl:'/app/views/activation/activate.html',
-		controller :'emailCtrl',
+		controller :'EmailManager',
 		controllerAs: 'email',
         authenticated:false
     })
 
 	.when('/resend',{
 		templateUrl:'/app/views/activation/resend.html',
-		controller :'resendCtrl',
+		controller :'ResendManager',
 		controllerAs: 'resend',
         authenticated:false
     })
 
 	.when('/resetusername',{
 		templateUrl:'/app/views/reset/username.html',
-		controller :'usernameCtrl',
+		controller :'UsernameManager',
 		controllerAs: 'username',
         authenticated:false
     })
 
 	.when('/resetpassword',{
 		templateUrl:'/app/views/reset/password.html',
-		controller :'passwordCtrl',
+		controller :'PasswordManager',
 		controllerAs: 'password',
         authenticated:false
     })
 
 	.when('/changepassword/:token',{
 		templateUrl:'/app/views/reset/changepassword.html',
-		controller :'changepasswordCtrl',
+		controller :'ChangePasswordManager',
 		controllerAs: 'changepassword',
         authenticated:false
     })
 
-	.when('/donatenow' ,{
-		templateUrl : 'app/views/donatenow.html',
+	.when('/contribute' ,{
+		templateUrl : 'app/views/contribute.html',
 		authenticated : true
 	})
 
-	.when('/donateraw', {
-		templateUrl : 'app/views/donateraw.html',
+	.when('/contributeraw', {
+		templateUrl : 'app/views/contributeraw.html',
 		authenticated : true,
-		controller : 'donaterawCtrl',
+		controller : 'DonateRawManager',
 		controllerAs : 'donateraw'
 	})
 
-	.when('/donatefood', {
-		templateUrl : 'app/views/donatefood.html',
+	.when('/contribute-meals', {
+		templateUrl : 'app/views/contribute-meals.html',
 		authenticated : true,
-		controller : 'donatecookedfoodCtrl',
+		controller : 'DonateCookedFoodManager',
 		controllerAs : 'donatecookedfood'
 	})
 
     .when('/donaterequest/:id', {
         templateUrl : 'app/views/readdonaterequest.html',
         authenticated : true,
-        controller : 'readdonaterequestCtrl',
+        controller : 'ReadDonateRequestManager',
         controllerAs : 'readdonaterequest'
     })
 
     .when('/accepteddonaterequests', {
         templateUrl : 'app/views/accepted.html',
         authenticated : true,
-        controller : 'acceptedCtrl',
+        controller : 'AcceptedManager',
         controllerAs : 'accepted'
     })
 
 	.when('/buydonate' ,{
 		templateUrl : 'app/views/buydonate.html',
-		controller : 'buydonateCtrl',
+		controller : 'BuyDonateManager',
 		controllerAs : 'buydonate',
 		authenticated : true
 	})
 
 	.when('/donaterequests' ,{
-		templateUrl : 'app/views/donaterequests.html',
-		controller : 'donaterequestsCtrl',
+		templateUrl : 'app/views/explore.html',
+		controller : 'DonateRequestsManager',
 		controllerAs : 'donaterequests',
-		authenticated : true
+		authenticated : false
 	})
 
 	.when('/cart' ,{
 		templateUrl : 'app/views/cart.html',
-		controller : 'cartCtrl',
+		controller : 'CartManager',
 		controllerAs : 'cart',
 		authenticated : true
 	})
 
 	.when('/donators' ,{
 		templateUrl : 'app/views/users/donators.html',
-		controller : 'donatorsCtrl',
+		controller : 'DonatorsManager',
 		controllerAs : 'donators',
 		authenticated : true
 	})
 
 	.when('/receivers' ,{
 		templateUrl : 'app/views/users/receivers.html',
-		controller : 'receiversCtrl',
+		controller : 'ReceiversManager',
 		controllerAs : 'receivers',
 		authenticated : true
 	})
 
 	.when('/volunteers' ,{
 		templateUrl : 'app/views/users/volunteers.html',
-		controller : 'volunteersCtrl',
+		controller : 'VolunteersManager',
 		controllerAs : 'volunteers',
 		authenticated : true
 	})
@@ -171,7 +190,7 @@ var app = angular.module('appRoutes',['ngRoute'])
 
 	.when('/addnewproduct',{
 		templateUrl : 'app/views/addnewproduct.html',
-		controller : 'addnewproductCtrl',
+		controller : 'AddNewProductManager',
 		controllerAs : 'product',
 		authenticated : true
 	})
@@ -179,7 +198,7 @@ var app = angular.module('appRoutes',['ngRoute'])
     .when('/orderplaced', {
         templateUrl : 'app/views/orderplaced.html',
         authenticated : true,
-		controller : 'orderplacedCtrl'
+		controller : 'OrderPlacedManager'
     })
 
 
@@ -193,7 +212,7 @@ var app = angular.module('appRoutes',['ngRoute'])
 app.run(['$rootScope','Auth','$location',function($rootScope, Auth , $location){
 
     $rootScope.$on('$routeChangeStart',function(event,next,current){
-    	// console.log(next.$$route);
+    	
 
         if(next.$$route.authenticated == true)
         {
@@ -211,8 +230,8 @@ app.run(['$rootScope','Auth','$location',function($rootScope, Auth , $location){
     });
 }
 ]);
-// .config(function(){
-// 	console.log("Testing routes");
-// });
+
+
+
 
 

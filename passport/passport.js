@@ -1,16 +1,24 @@
-var FacebookStrategy = require('passport-facebook').Strategy;
-var GoogleStrategy   = require('passport-google-oauth').OAuth2Strategy;
-var User             = require('../models/user.js');
-var session          = require('express-session');
-var jwt              = require('jsonwebtoken');
-var secret           = 'Pankaj';
+
+const GoogleStrategy   = require('passport-google-oauth').OAuth2Strategy;
+
+const User             = require('../models/user.js');
+const session          = require('express-session');
+const jwt              = require('jsonwebtoken');
+const secret           = 'Pankaj'; 
 
 module.exports = function(app, passport) {
     app.use(passport.initialize());
     app.use(passport.session());
-    app.use(session({ secret: 'keyboard cat', resave: false, saveUninitialized: true, cookie: { secure:false } }));
+    app.use(session({
+      name: 'rescuemeals_session_id',
+      secret: process.env.SESSION_SECRET || 'keyboard cat',
+      resave: false,
+      saveUninitialized: false,
+      cookie: { secure: false, maxAge: 3600000 }
+    }));
 
     passport.serializeUser(function(user, done) {
+        
         token = jwt.sign({ username: user.username, email: user.email }, secret, { expiresIn: '24h' });
         done(null, user.id);
     });
@@ -21,52 +29,83 @@ module.exports = function(app, passport) {
         });
     });
 
-    passport.use(new FacebookStrategy({
-        clientID: '352666358609920',
-        clientSecret: 'c2838d61c24beece7c3089db97582fa6',
-        callbackURL: "https://stark-taiga-43813.herokuapp.com/_oauth/facebook",
-        profileFields: ['id', 'displayName', 'photos', 'email']
-    }, function(accessToken, refreshToken, profile, done) {
-        console.log(profile);
-        User.findOne({ email: profile.emails[0].value }).select('username password email').exec(function(err, user) {
-            if (err) { done(err); }
-
-            if (user && user != null) {
-                done(null, user);
-            } else {
-                done(err);
-            }
-        });
-    }));
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     passport.use(new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "http://rescuemeals.onrender.com/oauth2callback",
-        userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo' // Added to specify the user profile URL
+        callbackURL: 'http://localhost:8080/oauth2callback',
+        userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo'
     }, function(accessToken, refreshToken, profile, done) {
-        console.log(profile.emails[0].value);
-        User.findOne({ email: profile.emails[0].value }).select('profile.name.givenName password email').exec(function(err, user) {
-            if (err) { done(err); }
-
-            if (user && user != null) {
-                done(null, user);
-            } else {
-                done(err);
-            }
-        });
+        if (profile.emails && profile.emails.length > 0) {
+            User.findOne({ email: profile.emails[0].value }).select('username password email').exec(function(err, user) {
+                if (err) { done(err); }
+                if (user && user != null) {
+                    done(null, user);
+                } else {
+                    done(err);
+                }
+            });
+        } else {
+            done(new Error("No email found from Google"));
+        }
     }));
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+    app.get('/auth/facebook', passport.authenticate('facebook', { scope: 'email' }));
     app.get('/_oauth/facebook', passport.authenticate('facebook', { failureRedirect: '/login' }), function(req, res) {
         res.redirect('/facebook/' + token);
     });
 
-    app.get('/auth/facebook', passport.authenticate('facebook', { scope: 'email' }));
-
-    app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] })); // Removed 'https://www.googleapis.com/auth/plus.login'
-
+    
+    app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
     app.get('/oauth2callback', passport.authenticate('google', { failureRedirect: '/login' }), function(req, res) {
         res.redirect('/google/' + token);
+    });
+
+    
+    app.get('/auth/twitter', passport.authenticate('twitter'));
+    app.get('/_oauth/twitter', passport.authenticate('twitter', { failureRedirect: '/login' }), function(req, res) {
+        
+        res.redirect('/twitter/' + token);
     });
 
     return passport;

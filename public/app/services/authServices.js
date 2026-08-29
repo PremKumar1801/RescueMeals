@@ -1,4 +1,4 @@
-// console.log('hi');
+
 
 angular.module('authServices',[])
 
@@ -6,23 +6,23 @@ angular.module('authServices',[])
     var authFactory={};
 
     authFactory.login = function(loginData){
-        return $http.post('/api/login',loginData).then(function(data){
-            //console.log(data.data.token);
-            AuthToken.setToken(data.data.token);
+        return $http.post('/api/v1/members/auth',loginData).then(function(data){
+            
+            AuthToken.setToken(data.data.payload.token);
             return data;
         });
     };
 
     authFactory.isLoggedIn=function(){
         if(AuthToken.getToken()){
-            return $http.post('/api/me');
+            return $http.post('/api/v1/members/me');
         }
         else {
             return false;
         }
     };
 
-    //Auth.facebook(token);
+    
 
     authFactory.facebook=function(token)
     {
@@ -36,7 +36,7 @@ angular.module('authServices',[])
 
     authFactory.getUser=function(){
       if(AuthToken.getToken()){
-          return $http.post('/api/me');
+          return $http.post('/api/v1/members/me');
       }
       else
       {
@@ -55,15 +55,15 @@ angular.module('authServices',[])
 
     authTokenFactory.setToken = function(token){
         if(token){
-            $window.localStorage.setItem('token',token);
+            $window.localStorage.setItem('rescuemeals_token',token);
         }
         else {
-            $window.localStorage.removeItem('token');
+            $window.localStorage.removeItem('rescuemeals_token');
         }
     };
 
     authTokenFactory.getToken = function(){
-        return $window.localStorage.getItem('token');
+        return $window.localStorage.getItem('rescuemeals_token');
     };
 
 

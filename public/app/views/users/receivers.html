@@ -1,14 +1,12 @@
 <div class="text-center">
-    <h1 >
-        Receivers
-    </h1>
+    <h1 >Beneficiaries</h1>
 </div>
 
 
 <div class="row">
     <div class="col-sm-3" ng-repeat="person in receivers.receivers" style="border : 2px solid white;border-radius: 2em;padding: 1em;">
         <img src="/assets/images/team/student.png">
-        <p style="font-size: 1.8em;color: white;margin-bottom: 0px;" class="text-center"> {{ person.name }}</p>
-        <p style="font-size: 1.0em;color: white;margin-bottom: 3px;"><span class="glyphicon glyphicon-map-marker"></span> {{ person.institute }}</p>
+        <p class="text-light" style="font-size: 1.8em;margin-bottom: 0px;" class="text-center"> {{ person.name }}</p>
+        <p class="text-muted-rm" style="font-size: 1.0em;margin-bottom: 3px;"><span class="glyphicon glyphicon-map-marker"></span> {{ person.institute }}</p>
     </div>
 </div>

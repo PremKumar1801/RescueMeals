@@ -15,19 +15,19 @@
                         <img src="assets/images/fooditems/{{item.name}}.png" class="cart-items-img">
                     </div>
                     <div  class="col-sm-2">
-                        <h2 style="color: white;margin-bottom: 0px;margin-top: 0px;"> {{item.name }}</h2>
-                        <p style="color: white;margin-bottom: 0px;">Price : {{ item.price }}/- </p>
-                        <p style="background-color: #d3007d;padding: 2vh;font-size: 2vh;margin-bottom: 0px;" class="badge">{{item.tag}}</p>
+                        <h2 class="text-light" style="margin-bottom: 0px;margin-top: 0px;"> {{item.name }}</h2>
+                        <p class="text-muted-rm" style="margin-bottom: 0px;">Price : {{ item.price }}/- </p>
+                        <p class="badge-rm" style="padding: 2vh;font-size: 2vh;margin-bottom: 0px;">{{item.tag}}</p>
                     </div>
                     <div class="col-sm-2">
-                        <p style="color: white;margin-top: 0px;margin-bottom: 0px;"><span class="dot"></span> In Stock</p>
+                        <p class="text-light" style="margin-top: 0px;margin-bottom: 0px;"><span class="dot"></span> In Stock</p>
                     </div>
                     <div class="col-sm-3">
-                        <p style="color: white;margin-top: 0px;margin-bottom: 0px;"><b>Quantity</b></p>
-                        <p style="background-color: #d3007d;padding-left:0.8em ;color: white;margin-top: 0px;" class="bedge">{{ item.count }} Item</p>
+                        <p class="text-light" style="margin-top: 0px;margin-bottom: 0px;"><b>Quantity</b></p>
+                        <p class="bedge badge-rm" style="padding-left:0.8em;margin-top: 0px;">{{ item.count }} Item</p>
                     </div>
                     <div class="col-sm-3">
-                        <button style="background-color: red" ng-click="cart.removeitem(item._id);">Remove  X</button>
+                        <button class="btn btn-rm-danger-solid" ng-click="cart.removeitem(item._id);">Discard  X</button>
                     </div>
                 </div>
             </div>
@@ -46,30 +46,30 @@
                     <div ng-show="cart.option">
                         <b>Pay via</b> : {{ cart.option }}
                         <a href="/orderplaced">
-                            <button style="background-color: green;" class="btn btn-primary">Place Order</button>
+                            <button class="btn btn-rm-primary">Finalize Order</button>
                         </a>
                     </div>
                     <div ng-show="!cart.option">
-                        <button style="background-color: green;" class="btn btn-primary"  data-toggle="modal" data-target="#myModal">Check Out</button>
+                        <button class="btn btn-rm-primary" data-toggle="modal" data-target="#myModal">Proceed to Checkout</button>
                     </div>
 
-                    <!-- Modal -->
+                    
                     <div id="myModal" class="modal fade" role="dialog">
                         <div class="modal-dialog">
 
-                            <!-- Modal content-->
+                            
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                    <h4 class="modal-title" style="margin-bottom: 0px;">Choose a Payment Gateway:</h4>
+                                    <h4 class="modal-title" style="margin-bottom: 0px;">Confirm Your Contribution:</h4>
                                 </div>
                                 <div class="modal-body">
                                     <div class="radio">
-                                        <label><input type="radio" name="optradio" value="RazorPay" ng-model="cart.option">Razorpay</label>
+                                        <label><input type="radio" name="optradio" value="Direct" ng-model="cart.option">Direct Contribution</label>
                                     </div>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="initiateRazorpayPayment()" style="margin-right: 250px; width: 500px;">PAY NOW</button>
+                                    <button type="button" class="btn btn-core-primary" data-dismiss="modal" onclick="initiateRazorpayPayment(10275)">Complete Contribution</button>
                                 </div>
                             </div>
 
@@ -79,14 +79,14 @@
             </div>
         </div>
     </div>
-    <div ng-show="cart.value==0" class="text-center" style="border: 2px solid white;border-radius: 1em;padding: 2em;">
+    <div ng-show="cart.value==0" class="text-center rm-card">
         <br>
         <br>
-        <h1 style="color: #ffd900;">Empty Cart!</h1>
+        <h1 class="rm-section-title">Your Basket is Empty</h1>
         <br>
         <br>
         <a href="/buydonate">
-            <button class="btn btn-primary">Add items to cart</button>
+            <button class="btn btn-rm-primary">Fill Basket</button>
         </a>
 
     </div>

@@ -1,7 +1,5 @@
 <div>
-    <h1 class="text-center">
-        Resend activation link
-    </h1>
+    <h1 class="text-center">Re-send Activation</h1>
 </div>
 
 <form ng-submit="resend.checkCredentials(loginData)">
@@ -13,7 +11,7 @@
     <input class="form-control" name="password" type="password" placeholder="Enter password" ng-model="resend.loginData.password">
     <br>
 
-    <button type="submit" class="btn btn-primary" ng-show="!resend.linksent">Send link </button>
+    <button type="submit" class="btn btn-rm-primary" ng-show="!resend.linksent">Dispatch Link</button>
 </form>
 <br>
 

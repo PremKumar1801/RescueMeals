@@ -10,14 +10,14 @@ var nameValidator = [
     validate({
         validator: 'matches',
         arguments: /^(([a-zA-Z]{3,20})+[ ]+([a-zA-Z]{3,20})+)+$/,
-        message: 'Name should have minimum 3 and maximum 20 characters separated by space and should not have any special characters or numbers',
+        message: 'Please provide a valid full name using only letters and spaces (e.g., Jane Doe).',
 
     }),
 
     validate({
         validator: 'isLength',
         arguments: [3, 25],
-        message: 'Name should be between {ARGS[0]} and {ARGS[1]} characters'
+        message: 'Your name must be strictly between {ARGS[0]} and {ARGS[1]} characters in length.'
     }),
 ];
 
@@ -25,14 +25,14 @@ var usernameValidator = [
 
     validate({
         validator: 'isAlphanumeric',
-        message: 'Username should contain only alphabets and numbers',
+        message: 'Usernames can only consist of letters and numbers (no special characters).',
 
     }),
 
     validate({
         validator: 'isLength',
         arguments: [3, 25],
-        message: 'Username should be between {ARGS[0]} and {ARGS[1]} characters'
+        message: 'Please pick a username between {ARGS[0]} and {ARGS[1]} characters long.'
     }),
 ];
 
@@ -40,13 +40,13 @@ var passwordValidator = [
     validate({
         validator: 'matches',
         arguments: /^(?=.*?[a-z])(?=.*[A-Z])(?=.*[\d])(?=.*[\W]).{8,25}$/,
-        message : 'Password must have one lowercase, one uppercase, one special character, one number and minimum 8 and maximum 25 character'
+        message : 'For security, your password must contain an uppercase letter, a lowercase letter, a number, and a symbol.'
     }),
 
     validate({
         validator: 'isLength',
         arguments: [8, 25],
-        message: 'Password should be between {ARGS[0]} and {ARGS[1]} characters'
+        message: 'Passwords must be exactly {ARGS[0]} to {ARGS[1]} characters long.'
     }),
 ];
 
@@ -54,14 +54,14 @@ var emailValidator = [
 
     validate({
         validator: 'isEmail',
-        message: 'Is not a valid e-mail',
+        message: 'Please provide a valid, correctly formatted email address.',
 
     }),
 
     validate({
         validator: 'isLength',
         arguments: [3, 50],
-        message: 'E-mail should be between {ARGS[0]} and {ARGS[1]} characters'
+        message: 'Email addresses cannot exceed {ARGS[1]} characters.'
     }),
 ];
 
@@ -122,21 +122,14 @@ userSchema.pre('save', function(next)
 	if(!user.isModified('password')) return next();
 
 	bcrypt.hash(user.password,null,null,function(err,hash) {
-	if(err)
-	{
-		console.log("Password not encrypted");
-	}
-	else
-	{
-		console.log("Password encrypted");
-	}
-	user.password = hash;
-	next();
+		if(err) return next(err);
+		user.password = hash;
+		next();
 	});
 });
 
 userSchema.plugin(titlize, {
-    paths: [ 'name'], // Array of paths
+    paths: [ 'name'], 
 });
 
 userSchema.methods.comparepassword=function(password){

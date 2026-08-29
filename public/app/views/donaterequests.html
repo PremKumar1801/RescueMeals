@@ -1,7 +1,7 @@
 <style>
     label {
         font-size: 16px;
-        color: white;
+        color: var(--core-text);
         margin-left: 1vh;
     }
 </style>
@@ -20,7 +20,7 @@
         <p class="items-price" style="font-size:2.5vh;text-transform: capitalize">{{x.city}}</p>
         <p class="items-price" style="font-size:2.5vh;text-transform: capitalize">{{x.state}}</p>
         <p style="width: 47%" class="items-tag text-center">Cooked Food</p>
-        <a href="/donaterequest/{{x._id}}"><button class="info-button">Know more ......</button></a>
+        <a href="/donaterequest/{{x._id}}"><button class="info-button">Learn More...</button></a>
     </div>
 
     <div class="col-sm-12 panel items" ng-repeat="x in donaterequests.rawfood | filter : { city : searchKeyword }">
@@ -28,7 +28,7 @@
         <p class="items-price" style="font-size:2.5vh;text-transform: capitalize">{{x.city}}</p>
         <p class="items-price" style="font-size:2.5vh;text-transform: capitalize">{{x.state}}</p>
         <p style="width: 47%" class="items-tag text-center">Raw Food</p>
-        <a href="/donaterequest/{{x._id}}"><button class="info-button">Know more ......</button></a>
+        <a href="/donaterequest/{{x._id}}"><button class="info-button">Learn More...</button></a>
     </div>
 
 </div>

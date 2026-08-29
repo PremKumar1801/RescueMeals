@@ -1,1068 +1,709 @@
-var User        = require('../models/user.js');
-var Rawitems    = require('../models/rawitems.js');
-var Cookedfood  = require('../models/cookedfood.js');
-var Product     = require('../models/product.js');
-var jwt         = require('jsonwebtoken');
-var nodemailer  = require('nodemailer');
-var secret      = 'Pankaj';
-var geocoding   = require('../utils/geocoding.js');
+const User = require('../models/user.js');
+const Rawitems = require('../models/rawitems.js');
+const Cookedfood = require('../models/cookedfood.js');
+const Product = require('../models/product.js');
+const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
+const secret = 'Pankaj';
+const geocoding = require('../helpers/geocoding.js');
 
-var transporter = nodemailer.createTransport({
-    service : 'gmail',
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_RHn1nKke9vOAj3',
+    key_secret: process.env.RAZORPAY_SECRET || 'dummy_secret'
+});
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
     auth: {
-        user: 'winterinternship2023@gmail.com',
-        pass: 'xxqsotuhxrfptgqj'
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
     }
 });
 
-module.exports = function(router){
+module.exports = function(router) {
 
-    //register route
-
-	router.post('/users',function(req,res){
-        var user = new User();
-
-        user.username = req.body.username;
-        user.password = req.body.password;
-        user.email = req.body.email;
-        user.name = req.body.name;
-        user.role = req.body.role;
-        user.institute = req.body.institute;
-        user.temporarytoken = jwt.sign({username: user.username, email:user.email},secret,{expiresIn: '24h'});
-        if(req.body.username == null || req.body.password == null || req.body.email == null || req.body.role == null || req.body.name == null || req.body.username == "" || req.body.password == "" || req.body.email == "" || req.body.name == "" || req.body.role == "")
-        {
-             //res.send("Make sure all fields are provided");
-            res.json({ success:false , message:'Make sure all fields are provided'});
-        }
-        else {
-            user.save(function(err) {
-                if(err) {
-                    if(err.errors != null) {
-                        // validation errors
-                        if(err.errors.name) {
-                            res.json({
-                                success: false,
-                                message: err.errors.name.message
-                            });
-                        } else if (err.errors.email) {
-                            res.json({
-                                success : false,
-                                message : err.errors.email.message
-                            });
-                        } else if(err.errors.password) {
-                            res.json({
-                                success : false,
-                                message : err.errors.password.message
-                            });
-                        } else {
-                            res.json({
-                                success : false,
-                                message : err
-                            });
-                        }
-                    } else {
-                        // duplication errors
-                        if(err.code === 11000) {
-                            //console.log(err.errmsg);
-                            if(err.errmsg[70] === 'e') {
-                                res.json({
-                                    success: false,
-                                    message: 'Email is already registered.'
-                                });
-                            } else if(err.errmsg[70] === 'u') {
-                                res.json({
-                                    success : false,
-                                    message : 'Username is already registered.'
-                                });
-                            } else {
-                                res.json({
-                                    success : false,
-                                    message : err
-                                });
-                            }
-                        } else {
-                            res.json({
-                                success: false,
-                                message: err
-                            })
-                        }
-                    }
-                }
-
-
-
-               else {
-                    //res.send("User created");
-                    var email = {
-                        from: '"RescueMeals Support" <Support@rescuemeals.com>',
-                        to: user.email,
-                        subject: 'Activation Link - RescueMeals Registration',
-                        text: 'Hello '+ user.name + 'Thank you for registering with us.Please find the below activation link Activation link Thank you Arpit Jaswal MD, RescueMeals',
-                        html: 'Hello <strong>'+ user.name + '</strong>,<br><br>Thank you for registering with us.Please find the below activation link<br><br><a href="http://rescuemeals.onrender.com/activate/'+ user.temporarytoken+'">Activation link</a><br><br>Thank you<br>Arpit Jaswal <br>MD, RescueMeals'
-                    };
-
-                    transporter.sendMail(email, function(err, info){
-                        if (err ){
-                            console.log(err);
-                        }
-                        else {
-                            console.log('Message sent: ' + info.response);
-                        }
-                    });
-
-                    res.json({ success:true , message:'Account Registered. Please check your inbox for the activation link'});
-                }
-            });
-        }
-	});
-
-	//check username
-
-    // router.post('/checkusername',function(req,res){
-    //     User.findOne({username:req.body.username}).select('username').exec(function(err,user){
-    //
-    //             if(user) {
-    //                 res.json({success: false, message: "Username is already taken"});
-    //                 //res.send("User doesn't exist");
-    //             }
-    //             else{
-    //                 res.json({success: true, message: "Valid username"});
-    //             }
-    //
-    //     });
-    // });
-
-    //check email
-
-    // router.post('/checkemail',function(req,res){
-    //     User.findOne({username:req.body.email}).select('email').exec(function(err,user){
-    //
-    //         if(user) {
-    //             res.json({success: false, message: "Email is already taken"});
-    //             //res.send("User doesn't exist");
-    //         }
-    //         else{
-    //             res.json({success: true, message: "Valid email"});
-    //         }
-    //
-    //     });
-    // });
-
-    //login route
-
-	router.post('/login',function(req,res){
-	User.findOne({username:req.body.username}).select('username password email active').exec(function(err,user){
-        if(req.body.username == null || req.body.password == null || req.body.username == "" || req.body.password == "")
-        {
-            res.json({success: false, message: "Please fill in the complete details"});
-		}
-		else
-		{
-            if(!user) {
-                res.json({success: false, message: "User doesn't exist"});
-                //res.send("User doesn't exist");
-            }
-            else
-            {
-            	var validation = user.comparepassword(req.body.password);
-
-            	if(!user.active){
-                    res.json({success: false, message: "Your account is not yet activated. Please check your email for the activation link",expired:true});
-                }
-                else{
-                    if(validation){
-                        var token = jwt.sign({username: user.username, email:user.email},secret,{expiresIn: '24h'});
-                        res.json({success: true, message: "Login Successful",token:token});
-                    }
-                    else{
-                        res.json({success: false, message: "Incorrect Password"});
-                    }
-                }
-            }
-		}
-	});
-});
-
-	// Resend Activation Link
-
-
-    router.post('/resend',function(req,res) {
-
-
-        if (!req.body.username || !req.body.password ) {
-            res.json({success: false, message: "Please fill in the complete details"});
-        }
-        else {
-            User.findOne({username: req.body.username}).select('username password active').exec(function (err, user) {
-
-                //console.log(req.body.username);
-
-                if (!user) {
-                    res.json({success: false, message: "User doesn't exist"});
-                    //res.send("User doesn't exist");
-                }
-                else {
-
-                    if (user.active) {
-                        res.json({success: false, message: "Your account is already activated"});
-                    }
-                    else {
-
-                        var validation = user.comparepassword(req.body.password);
-
-                        if (validation) {
-                            res.json({success: true, user: user});
-                        }
-                        else {
-                            res.json({success: false, message: "Incorrect Password"});
-                        }
-                    }
-                }
-            })
+    router.post('/order', async (req, res) => {
+        try {
+            const options = {
+                amount: req.body.amount,
+                currency: "INR",
+                receipt: "receipt_prem_001"
+            };
+            const order = await razorpay.orders.create(options);
+            res.status(200).json(order);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
         }
     });
 
-    //Updating the database with the new token and sending the link again
+    router.post('/verify', (req, res) => {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
+        
+        const expectedSignature = crypto
+            .createHmac('sha256', process.env.RAZORPAY_SECRET)
+            .update(body.toString())
+            .digest('hex');
 
-    router.put('/sendlink',function(req,res) {
-
-            User.findOne({username: req.body.username}).select('username name email temporarytoken').exec(function (err, user) {
-
-                if(err) throw err;
-                //console.log(req.body.username);
-                user.temporarytoken = jwt.sign({username: user.username, email:user.email},secret,{expiresIn: '24h'});
-
-                user.save(function(err){
-                    if(err){
-                        console.log(err);
-                    }
-                    else{
-                        var email = {
-                            from: 'RescueMeals Registration, support@RescueMeals.com',
-                            to: user.email,
-                            subject: 'Activation Link Request - RescueMeals Registration',
-                            text: 'Hello '+ user.name + 'You requested for a new account activation link. Please find the below activation link Activation link Thank you Arpit Jaswal MD, RescueMeals',
-                            html: 'Hello <strong>'+ user.name + '</strong>,<br><br>You requested for a new account activation link. Please find the below activation link<br><br><a href="http://rescuemeals.onrender.com/activate/'+ user.temporarytoken+'">Activation link</a><br><br>Thank you<br>Arpit Jaswal <br>MD, RescueMeals'
-                        };
-
-                        transporter.sendMail(email, function(err, info){
-                            if (err ){
-                                console.log(err);
-                            }
-                            else {
-                                console.log('Message sent: ' + info.response);
-                            }
-                        });
-
-                        res.json({success:true , message:'Activation Link has been resent to ' + user.email + ' !'});
-
-                    }
-                })
-            })
-    });
-
-
-    //Forgot Username
-
-    router.post('/resetusername',function(req,res) {
-
-            if (!req.body.email) {
-                res.json({success: false, message: "Please enter the email"});
-            }
-            else {
-                User.findOne({email: req.body.email}).select('username name email').exec(function (err, user) {
-
-                    if(err){
-                        console.log(err);
-                    }
-                    else if (!user) {
-                        res.json({success: false, message: "User doesn't exist"});
-                        //res.send("User doesn't exist");
-                    }
-                    else {
-
-                        var email = {
-                            from: 'RescueMeals, support@RescueMeals.com',
-                            to: user.email,
-                            subject: 'Reset Username Request - RescueMeals Registration',
-                            text: 'Hello ' + user.name + 'You requested for the username. Your username is ' + user.username + ' Thank you Arpit Jaswal MD, RescueMeals',
-                            html: 'Hello <strong>' + user.name + '</strong>,<br><br>You requested for the username. Your username is <strong>' + user.username + '</strong><br><br>Thank you<br>Arpit Jaswal <br>MD, RescueMeals'
-                        };
-
-                        transporter.sendMail(email, function (err, info) {
-                            if (err) {
-                                console.log(err);
-                            }
-                            else {
-                                console.log('Message sent: ' + info.response);
-                            }
-                        });
-
-                        res.json({
-                            success: true,
-                            message: 'Username has been sent to ' + user.email + ' !',
-                        });
-
-                    }
-                })
-            }
-    });
-
-    router.post('/resetpassword',function(req,res) {
-
-        if (!req.body.email) {
-            res.json({success: false, message: "Please enter the email"});
-        }
-        else {
-            User.findOne({email: req.body.email}).select('username name email').exec(function (err, user) {
-
-                if(err){
-                    console.log(err);
-                }
-                else if (!user) {
-                    res.json({success: false, message: "User doesn't exist"});
-                    //res.send("User doesn't exist");
-                }
-                else {
-
-                    user.temporarytoken =  jwt.sign({ username:user.username ,name: user.name, email:user.email},secret,{expiresIn: '24h'});
-
-                    user.save(function(err)
-                    {
-                        if(err){
-                            throw err;
-                        }
-                        else{
-                            var email = {
-                                from: 'RescueMeals, support@RescueMeals.com',
-                                to: user.email,
-                                subject: 'Reset Password Link - RescueMeals',
-                                text: 'Hello '+ user.name + 'You requested for the reset password.Please find the below reset password link Reset Password link Thank you Arpit Jaswal MD, RescueMeals',
-                                html: 'Hello <strong>'+ user.name + '</strong>,<br><br>You requested for the reset password.Please find the below reset password link <br><br><a href="http://rescuemeals.onrender.com/changepassword/'+ user.temporarytoken+'">Reset Password link</a><br><br>Thank you<br>Arpit Jaswal <br>MD, RescueMeals'
-                            };
-
-                            transporter.sendMail(email, function(err, info){
-                                if (err ){
-                                    console.log(err);
-                                }
-                                else {
-                                    console.log('Message sent: ' + info.response);
-                                }
-                            });
-
-                            res.json({ success:true , message:'Reset Password link sent. Check your inbox', token: user.temporarytoken});
-                        }
-                    })
-
-                }
-            })
-        }
-    });
-
-    router.post('/setpassword/:token',function(req,res) {
-
-        if (!req.params.token) {
-            res.json({success: false, message: "Token not provided"});
-        }
-        else {
-            User.findOne({temporarytoken: req.params.token}, function (err, user) {
-                //console.log('hi'+req.params.token+'hi');
-
-                if (err) {
-                    throw err;
-                }
-
-                var token = req.params.token;
-
-                jwt.verify(token, secret, function (err, decoded) {
-                    if (err) {
-                        res.json({success: false, message: "Reset Password Link has expired"});
-                    }
-                    else if (!user) {
-                        res.json({success: false, message: "Reset Password Link has expired"});
-                    }
-                    else {
-
-                        user.temporarytoken = false;
-                        user.active = true;
-                        user.save(function (err) {
-                            if (err) {
-                                console.log(err);
-                            }
-                            else {
-
-                                var email = {
-                                    from: 'RescueMeals, support@RescueMeals.com',
-                                    to: user.email,
-                                    subject: 'Password changed - RescueMeals',
-                                    text: 'Hello ' + user.name + 'Your account has been activated. Thank you Arpit Jaswal MD, RescueMeals',
-                                    html: 'Hello <strong>' + user.name + '</strong>,<br><br>Your account has been activated<br><br>Thank you<br>Arpit Jaswal <br>MD, RescueMeals'
-                                };
-
-                                transporter.sendMail(email, function (err, info) {
-                                    if (err) {
-                                        console.log(err);
-                                    }
-                                    else {
-                                        console.log('Message sent: ' + info.response);
-                                    }
-                                });
-
-
-                                res.json({success: true, message: "Password changed"});
-                            }
-                        })
-                    }
-                })
-            })
-        }
-    });
-
-    // change password
-    router.put('/changepassword', function (req,res) {
-
-        if(!req.body) {
-            res.json({
-                success : false,
-                message : 'Details are missing.'
-            });
+        if (expectedSignature === razorpay_signature) {
+            res.status(200).json({ message: "Payment verified successfully", verified: true });
         } else {
+            res.status(400).json({ message: "Invalid signature", verified: false });
+        }
+    });
 
-            User.findOne({ temporarytoken : req.body.token }).select('username password email').exec( function (err, user) {
-                if(err) {
-                    throw err;
-                }
+    
+    router.post('/v1/members/register', async (req, res) => {
+        try {
+            const { username, password, email, name, role, institute } = req.body;
 
-                if(!user) {
-                    res.json({
-                        success : false,
-                        message : 'Token invalid.'
-                    });
+            if (!username || !password || !email || !role || !name) {
+                return res.json({ status: 'error', payload: { message: 'Please ensure all required fields are filled out.' } });
+            }
+
+            const temporarytoken = jwt.sign({ username, email }, secret, { expiresIn: '24h' });
+
+            const user = new User({
+                username, password, email, name, role, institute, temporarytoken
+            });
+
+            await user.save();
+
+            const emailOpts = {
+                from: '"RescueMeals" <prem@rescuemeals.org>',
+                to: email,
+                subject: 'Welcome to RescueMeals! Activate Your Account',
+                text: `Hi ${name},\n\nWelcome to RescueMeals! We're thrilled to have you join our mission. Please use the following link to activate your account:\nhttp://localhost:8080/activate/${temporarytoken}\n\nCheers,\nPrem, Founder of RescueMeals`,
+                html: `<h3>Hi ${name},</h3><p>Welcome to <strong>RescueMeals</strong>! We're thrilled to have you join our mission.</p><p>Please click the link below to activate your account:</p><p><a href="http://localhost:8080/activate/${temporarytoken}">Activate My Account</a></p><p>Cheers,<br>Prem<br>Founder, RescueMeals</p>`
+            };
+
+            transporter.sendMail(emailOpts, (err, info) => {
+                
+            });
+
+            return res.json({ status: 'ok', payload: { message: 'Welcome! Your account has been created. Please check your email for the activation link.' } });
+
+        } catch (err) {
+            if (err.errors != null) {
+                if (err.errors.name) {
+                    return res.json({ status: 'error', payload: { message: err.errors.name.message } });
+                } else if (err.errors.email) {
+                    return res.json({ status: 'error', payload: { message: err.errors.email.message } });
+                } else if (err.errors.password) {
+                    return res.json({ status: 'error', payload: { message: err.errors.password.message } });
                 } else {
-
-                    console.log(user.password);
-
-                    user.password = req.body.password;
-
-                    user.save(function (err) {
-                        if(err) {
-                            res.json({
-                                success : false,
-                                message : 'Error while saving password.'
-                            });
-                        } else {
-                            res.json({
-                                success : true,
-                                message : 'Password successfully updated.'
-                            })
-                        }
-                    });
+                    return res.json({ status: 'error', payload: { message: err.message || err } });
                 }
-            })
-        }
-    });
-
-    //Account activation link
-
-    router.put('/activate/:token',function(req,res){
-
-	    if(!req.params.token){
-	        res.json({success:false , message:'No token provided'});
-        }
-        else{
-            User.findOne({temporarytoken : req.params.token},function(err,user){
-                //console.log('hi'+req.params.token+'hi');
-
-                if(err){
-                    throw err;
+            } else if (err.code === 11000) {
+                if (err.errmsg && err.errmsg.indexOf('email') !== -1) {
+                    return res.json({ status: 'error', payload: { message: 'This email address is already associated with an account.' } });
+                } else if (err.errmsg && err.errmsg.indexOf('username') !== -1) {
+                    return res.json({ status: 'error', payload: { message: 'That username is taken. Please choose another one.' } });
+                } else {
+                    return res.json({ status: 'error', payload: { message: err.message || err } });
                 }
-
-                var token = req.params.token;
-
-                jwt.verify(token,secret,function(err,decoded){
-                    if(err){
-                        res.json({success:false,message:"Activation Link has expired"});
-                    }
-                    else if(!user) {
-                        res.json({success:false,message:"Activation Link has expired"});
-                    }
-                    else{
-
-                        user.temporarytoken=false;
-                        user.active=true;
-                        user.save(function(err){
-                            if(err){
-                                console.log(err);
-                            }
-                            else{
-
-                                var email = {
-                                    from: 'RescueMeals Registration, support@RescueMeals.com',
-                                    to: user.email,
-                                    subject: 'Account Activated - RescueMeals Registration',
-                                    text: 'Hello '+ user.name + 'Your account has been activated. Thank you Arpit Jaswal MD, RescueMeals',
-                                    html: 'Hello <strong>'+ user.name + '</strong>,<br><br>Your account has been activated<br><br>Thank you<br>Arpit Jaswal <br>MD, RescueMeals'
-                                };
-
-                                transporter.sendMail(email, function(err, info){
-                                    if (err ){
-                                        console.log(err);
-                                    }
-                                    else {
-                                        console.log('Message sent: ' + info.response);
-                                    }
-                                });
-
-
-                                res.json({success:true,message:"Account Activated"});
-                            }
-                        })
-                    }
-                });
-
-            })
-        }
-
-
-    });
-
-	router.use(function(req,res,next)
-	{
-        var token = req.body.token || req.body.query || req.headers['x-access-token'];
-        if(token){
-            jwt.verify(token,secret,function(err,decoded){
-                if(err){
-                    res.json({success:false,message:"Token Invalid"});
-                }
-                else {
-                	req.decoded = decoded;
-                	next();
-                    //res.json({success:true,message:"Token Verified"});
-                }
-            });
-        }
-        else {
-            res.json({success:false, message:"Token not provided"});
-        }
-	});
-
-    router.post('/me', function (req,res) {
-
-        //console.log(req.decoded.email);
-        // getting profile of user from database using email, saved in the token in localStorage
-        User.findOne({ email : req.decoded.email }).select('email username name role').exec(function (err, user) {
-            if(err) throw err;
-
-            if(!user) {
-                res.status(500).send('User not found.');
-            } else {
-                res.send(user);
             }
-        });
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
     });
 
+    
+    router.post('/v1/members/auth', async (req, res) => {
+        try {
+            const { username, password } = req.body;
 
-    // route to post data of donating raw food
-    router.post('/donaterawfood', function (req,res) {
+            if (!username || !password) {
+                return res.json({ status: 'error', payload: { message: "We need all details to proceed. Please complete the form." } });
+            }
 
-        var food = new Rawitems();
-        food.name = req.body.name;
-        food.quantity = req.body.quantity;
-        food.city = req.body.city;
-        food.state = req.body.state;
-        food.postedby = req.decoded.username;
-        
-        // Add unit if provided
-        if (req.body.unit) {
-            food.unit = req.body.unit;
-        }
-        
-        // Add expiry date if provided
-        if (req.body.expiryDate) {
-            food.expiryDate = new Date(req.body.expiryDate);
-        }
-        
-        // Add address if provided
-        if (req.body.address) {
-            food.address = req.body.address;
-        }
+            const user = await User.findOne({ username }).select('username password email active');
+            if (!user) {
+                return res.json({ status: 'error', payload: { message: "We couldn't find an account with that information." } });
+            }
 
-        if(req.body.name == null || req.body.quantity == null || req.body.city == null || req.body.state == null || req.body.name == "" || req.body.quantity == "" || req.body.city == "" || req.body.state == "" )
-        {
-            //res.send("Make sure all fields are provided");
-            res.json({ success:false , message:'Make sure all fields are provided'});
+            const validation = user.comparepassword(password);
+            if (!user.active) {
+                return res.json({ status: 'error', payload: { message: "Your account is pending activation. Please check your email for the link.", expired: true } });
+            }
+
+            if (!validation) {
+                return res.json({ status: 'error', payload: { message: "The password you entered is incorrect." } });
+            }
+
+            const token = jwt.sign({ username: user.username, email: user.email }, secret, { expiresIn: '24h' });
+            return res.json({ status: 'ok', payload: { message: "Welcome back! You have successfully logged in.", token } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
         }
-        else {
-            // Try to geocode the address
-            const addressToGeocode = food.address || `${food.city}, ${food.state}`;
+    });
+
+    
+    router.post('/v1/members/resend', async (req, res) => {
+        try {
+            const { username, password } = req.body;
             
-            geocoding.geocodeAddress(food.address, food.city, food.state)
-                .then(locationData => {
-                    // Add location data to the food item
-                    food.location = {
-                        latitude: locationData.latitude,
-                        longitude: locationData.longitude
-                    };
-                    
-                    // If address wasn't provided but we got a formatted one from geocoding
-                    if (!food.address && locationData.formattedAddress) {
-                        food.address = locationData.formattedAddress;
-                    }
-                    
-                    // Save the food item with location data
-                    return food.save();
-                })
-                .then(() => {
-                    res.json({ 
-                        success: true, 
-                        message: 'Donate request successfully posted with location data. We will contact you soon'
-                    });
-                })
-                .catch(err => {
-                    // If geocoding fails, still save the food item without location data
-                    food.save(function(err) {
-                        if(err) {
-                            res.json({
-                                success: false,
-                                message: 'Error in saving the data to the database: ' + err.message
-                            });
-                        }
-                        else {
-                            res.json({ 
-                                success: true, 
-                                message: 'Donate request successfully posted. We will contact you soon'
-                            });
-                        }
-                    });
-                });
+            if (!username || !password) {
+                return res.json({ status: 'error', payload: { message: "We need all details to proceed. Please complete the form." } });
+            }
+
+            const user = await User.findOne({ username }).select('username password active');
+            if (!user) {
+                return res.json({ status: 'error', payload: { message: "We couldn't find an account with that information." } });
+            }
+
+            if (user.active) {
+                return res.json({ status: 'error', payload: { message: "Good news! Your account is already fully activated." } });
+            }
+
+            const validation = user.comparepassword(password);
+            if (!validation) {
+                return res.json({ status: 'error', payload: { message: "The password you entered is incorrect." } });
+            }
+
+            return res.json({ status: 'ok', payload: { user } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
         }
     });
 
 
-    // route to post data of donating cooked food
-    router.post('/donateCookedFood', function (req,res) {
+    
+    router.put('/v1/members/sendlink', async (req, res) => {
+        try {
+            const { username } = req.body;
+            const user = await User.findOne({ username }).select('username name email temporarytoken');
+            if (!user) {
+                return res.json({ status: 'error', payload: { message: "We couldn't find an account with that information." } });
+            }
 
-        if(!req.body.meal || !req.body.people || !req.body.city || !req.body.state) {
-            res.json({
-                success : false,
-                message : 'Please ensure you fill all details.'
+            user.temporarytoken = jwt.sign({ username: user.username, email: user.email }, secret, { expiresIn: '24h' });
+            await user.save();
+
+            const emailOpts = {
+                from: '"RescueMeals" <prem@rescuemeals.org>',
+                to: user.email,
+                subject: 'Your New RescueMeals Activation Link',
+                text: `Hi ${user.name},\n\nWe received a request for a new activation link for your RescueMeals account. Please use the following link to activate your account:\nhttp://localhost:8080/activate/${user.temporarytoken}\n\nCheers,\nPrem, Founder of RescueMeals`,
+                html: `<h3>Hi ${user.name},</h3><p>We received a request for a new activation link for your <strong>RescueMeals</strong> account.</p><p>Please click the link below to activate your account:</p><p><a href="http://localhost:8080/activate/${user.temporarytoken}">Activate My Account</a></p><p>Cheers,<br>Prem<br>Founder, RescueMeals</p>`
+            };
+
+            transporter.sendMail(emailOpts, (err, info) => {
+                
             });
+
+            return res.json({ status: 'ok', payload: { message: 'A fresh activation link has been sent to ' + user.email + '!' } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
+    });
+
+    
+    router.post('/v1/members/resetusername', async (req, res) => {
+        try {
+            if (!req.body.email) {
+                return res.json({ status: 'error', payload: { message: "Please provide your email address." } });
+            }
+
+            const user = await User.findOne({ email: req.body.email }).select('username name email');
+            if (!user) {
+                return res.json({ status: 'error', payload: { message: "We couldn't find an account with that information." } });
+            }
+
+            const emailOpts = {
+                from: '"RescueMeals" <prem@rescuemeals.org>',
+                to: user.email,
+                subject: 'RescueMeals - Your Username Reminder',
+                text: `Hi ${user.name},\n\nYou requested a reminder for your RescueMeals username. Your username is: ${user.username}\n\nCheers,\nPrem, Founder of RescueMeals`,
+                html: `<h3>Hi ${user.name},</h3><p>You requested a reminder for your <strong>RescueMeals</strong> username.</p><p>Your username is: <strong>${user.username}</strong></p><p>Cheers,<br>Prem<br>Founder, RescueMeals</p>`
+            };
+
+            transporter.sendMail(emailOpts, (err, info) => {
+                
+            });
+
+            return res.json({ status: 'ok', payload: { message: 'We\'ve sent your username to ' + user.email + '.' } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
+    });
+
+    router.post('/v1/members/resetpassword', async (req, res) => {
+        try {
+            if (!req.body.email) {
+                return res.json({ status: 'error', payload: { message: "Please provide your email address." } });
+            }
+
+            const user = await User.findOne({ email: req.body.email }).select('username name email');
+            if (!user) {
+                return res.json({ status: 'error', payload: { message: "We couldn't find an account with that information." } });
+            }
+
+            user.temporarytoken = jwt.sign({ username: user.username, name: user.name, email: user.email }, secret, { expiresIn: '24h' });
+            await user.save();
+
+            const emailOpts = {
+                from: '"RescueMeals" <prem@rescuemeals.org>',
+                to: user.email,
+                subject: 'RescueMeals - Password Reset Request',
+                text: `Hi ${user.name},\n\nWe received a request to reset your RescueMeals password. Please use the following link to reset it:\nhttp://localhost:8080/changepassword/${user.temporarytoken}\n\nCheers,\nPrem, Founder of RescueMeals`,
+                html: `<h3>Hi ${user.name},</h3><p>We received a request to reset your <strong>RescueMeals</strong> password.</p><p>Please click the link below to securely reset your password:</p><p><a href="http://localhost:8080/changepassword/${user.temporarytoken}">Reset My Password</a></p><p>Cheers,<br>Prem<br>Founder, RescueMeals</p>`
+            };
+
+            transporter.sendMail(emailOpts, (err, info) => {
+                
+            });
+
+            return res.json({ status: 'ok', payload: { message: 'A password reset link has been dispatched to your email.', token: user.temporarytoken } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
+    });
+
+    router.post('/v1/members/setpassword/:token', async (req, res) => {
+        try {
+            const token = req.params.token;
+            if (!token) {
+                return res.json({ status: 'error', payload: { message: "An authentication token is required." } });
+            }
+
+            const user = await User.findOne({ temporarytoken: token });
+            try {
+                jwt.verify(token, secret);
+            } catch (err) {
+                return res.json({ status: 'error', payload: { message: "Your password reset link is invalid or has expired." } });
+            }
+
+            if (!user) {
+                return res.json({ status: 'error', payload: { message: "Your password reset link is invalid or has expired." } });
+            }
+
+            user.temporarytoken = false;
+            user.active = true;
+            await user.save();
+
+            const emailOpts = {
+                from: '"RescueMeals" <prem@rescuemeals.org>',
+                to: user.email,
+                subject: 'RescueMeals - Password Successfully Changed',
+                text: `Hi ${user.name},\n\nYour RescueMeals password has been successfully updated. If you did not make this change, please contact us immediately.\n\nCheers,\nPrem, Founder of RescueMeals`,
+                html: `<h3>Hi ${user.name},</h3><p>Your <strong>RescueMeals</strong> password has been successfully updated.</p><p>If you did not make this change, please contact us immediately.</p><p>Cheers,<br>Prem<br>Founder, RescueMeals</p>`
+            };
+
+            transporter.sendMail(emailOpts, (err, info) => {
+                
+            });
+
+            return res.json({ status: 'ok', payload: { message: "Your password has been securely updated." } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
+    });
+
+    
+    router.put('/v1/members/changepassword', async (req, res) => {
+        try {
+            if (!req.body || !req.body.token || !req.body.password) {
+                return res.json({ status: 'error', payload: { message: 'Some required details are missing from your request.' } });
+            }
+
+            const user = await User.findOne({ temporarytoken: req.body.token }).select('username password email');
+            if (!user) {
+                return res.json({ status: 'error', payload: { message: 'The provided token is invalid.' } });
+            }
+
+            user.password = req.body.password;
+            await user.save();
+
+            return res.json({ status: 'ok', payload: { message: 'Your password was updated successfully!' } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
+    });
+
+    
+    router.put('/v1/members/activate/:token', async (req, res) => {
+        try {
+            const token = req.params.token;
+            if (!token) {
+                return res.json({ status: 'error', payload: { message: 'Please provide an authentication token.' } });
+            }
+
+            const user = await User.findOne({ temporarytoken: token });
+            
+            try {
+                jwt.verify(token, secret);
+            } catch (err) {
+                return res.json({ status: 'error', payload: { message: "This activation link is no longer valid." } });
+            }
+
+            if (!user) {
+                return res.json({ status: 'error', payload: { message: "This activation link is no longer valid." } });
+            }
+
+            user.temporarytoken = false;
+            user.active = true;
+            await user.save();
+
+            const emailOpts = {
+                from: '"RescueMeals" <prem@rescuemeals.org>',
+                to: user.email,
+                subject: 'Welcome Aboard! Your RescueMeals Account is Active',
+                text: `Hi ${user.name},\n\nYour RescueMeals account has been fully activated. We are excited to have you on board! Let's start making a difference together.\n\nCheers,\nPrem, Founder of RescueMeals`,
+                html: `<h3>Hi ${user.name},</h3><p>Your <strong>RescueMeals</strong> account has been fully activated. We are excited to have you on board! Let's start making a difference together.</p><p>Cheers,<br>Prem<br>Founder, RescueMeals</p>`
+            };
+
+            transporter.sendMail(emailOpts, (err, info) => {
+                
+            });
+
+            return res.json({ status: 'ok', payload: { message: "Success! Your account is now active." } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
+    });
+
+
+    router.use((req, res, next) => {
+        const token = req.body.token || req.query.token || req.headers['x-access-token'];
+        if (token) {
+            try {
+                const decoded = jwt.verify(token, secret);
+                req.decoded = decoded;
+                next();
+            } catch (err) {
+                return res.json({ status: 'error', payload: { message: "Your session token is invalid. Please log in again." } });
+            }
         } else {
-            var cookedfood = new Cookedfood();
-
-            cookedfood.meal = req.body.meal;
-            cookedfood.people = req.body.people;
-            cookedfood.city = req.body.city;
-            cookedfood.state = req.body.state;
-            cookedfood.postedby = req.decoded.username;
-            
-            // Add expiry date if provided
-            if (req.body.expiryDate) {
-                cookedfood.expiryDate = new Date(req.body.expiryDate);
-            }
-            
-            // Add address if provided
-            if (req.body.address) {
-                cookedfood.address = req.body.address;
-            }
-            
-            // Try to geocode the address
-            geocoding.geocodeAddress(cookedfood.address, cookedfood.city, cookedfood.state)
-                .then(locationData => {
-                    // Add location data to the food item
-                    cookedfood.location = {
-                        latitude: locationData.latitude,
-                        longitude: locationData.longitude
-                    };
-                    
-                    // If address wasn't provided but we got a formatted one from geocoding
-                    if (!cookedfood.address && locationData.formattedAddress) {
-                        cookedfood.address = locationData.formattedAddress;
-                    }
-                    
-                    // Save the food item with location data
-                    return cookedfood.save();
-                })
-                .then(() => {
-                    res.json({
-                        success: true,
-                        message: 'Donate Request successfully posted with location data.'
-                    });
-                })
-                .catch(err => {
-                    // If geocoding fails, still save the food item without location data
-                    cookedfood.save(function(err) {
-                        if(err) {
-                            res.json({
-                                success: false,
-                                message: 'Error in saving the data to the database: ' + err.message
-                            });
-                        } else {
-                            res.json({
-                                success: true,
-                                message: 'Donate Request successfully posted.'
-                            });
-                        }
-                    });
-                });
+            return res.json({ status: 'error', payload: { message: "An authentication token is required." } });
         }
     });
 
-    router.get('/donaterequests',function(req,res){
-
-        var institute = User();
-
-       Rawitems.find({ requeststatus : false }).exec(function(err,user){
-           if(err){
-               res.json({success:false,message:'No requests found for donation of raw food'});
-           }
-           else{
-               console.log(user);
-               Cookedfood.find({ requeststatus : false }, function (err, food) {
-
-                   if(err){
-                       res.json({success:false,message:'No requests found for donation of cooked food'});
-                   } else{
-                       res.json({success:true,user:user,food:food,institute:institute});
-                   }
-               });
-           }
-
-       })
+    router.post('/v1/members/me', async (req, res) => {
+        try {
+            const user = await User.findOne({ email: req.decoded.email }).select('email username name role');
+            if (!user) {
+                return res.status(500).send('That user profile does not exist.');
+            }
+            res.send(user);
+        } catch (err) {
+            return res.status(500).send('Server error');
+        }
     });
 
-    router.get('/readdonaterequest/:id', function (req, res) {
-        Rawitems.findOne({_id: req.params.id},function(err,raw){
-            if(err){
-                res.json({success:false});
+    
+    router.post('/v1/members/donaterawfood', async (req, res) => {
+        try {
+            const { name, quantity, city, state, unit, expiryDate, address } = req.body;
+            
+            if (!name || !quantity || !city || !state) {
+                return res.json({ status: 'error', payload: { message: 'Please ensure all required fields are filled out.' } });
             }
-            if(!raw) {
-                Cookedfood.findOne({ _id : req.params.id}, function (err,cooked) {
-                    if (err) {
-                        throw err;
-                    }
-                    if (!cooked) {
-                        res.json({
-                            success: false,
-                            message: 'Food not found.'
-                        });
-                    } else {
-                        User.findOne({ username : cooked.postedby }, function (err, user) {
-                            if(err){
-                                throw err;
-                            }
-                            else if(!user){
-                                res.json({success:false,message:'User not found'});
-                            }
-                            else{
-                                res.json({success:true,user:user,food:cooked});
-                            }
-                        });
 
-                    }
-                });
+            const food = new Rawitems({
+                name,
+                quantity,
+                city,
+                state,
+                postedby: req.decoded.username
+            });
+            
+            if (unit) food.unit = unit;
+            if (expiryDate) food.expiryDate = new Date(expiryDate);
+            if (address) food.address = address;
 
-            }
-            else{
-                User.findOne({ username : raw.postedby }, function (err, user) {
-                    if(err){
-                        throw err;
-                    }
-                    else if(!user){
-                        res.json({success:false,message:'User not found'});
-                    }
-                    else{
-                        res.json({success:true,user:user,food:raw});
-                    }
-                });
-
-            }
-        });
-        console.log(req.params.id);
-    });
-
-    // request accept
-    router.put('/accept/:id', function (req, res) {
-
-        User.findOne({ username : req.decoded.username }, function (err, user) {
-            if(err) {
-                throw err;
-            } else {
-                console.log(user);
-
-                Rawitems.findOne({ _id : req.params.id }, function (err, raw) {
-                    if(err) {
-                        throw err;
-                    } else if(!raw) {
-                        Cookedfood.findOne({ _id : req.params.id }, function (err,cook) {
-                            if(err) {
-                                throw err;
-                            } else {
-                                //console.log(cook);
-
-                                cook.requeststatus = true;
-                                cook.acceptedby = req.decoded.username;
-
-                                cook.save(function (err) {
-                                    if(err) {
-                                        res.json({success : false, message : 'Error while saving.'})
-                                    } else {
-                                        res.json({
-                                            success : true,
-                                            message : 'Requests accepted.'
-                                        })
-                                    }
-                                });
-                            }
-                        })
-                    } else {
-                        //console.log(raw);
-
-                        raw.requeststatus = true;
-                        raw.acceptedby = req.decoded.username;
-
-                        raw.save(function (err) {
-                            if(err) {
-                                res.json({success : false, message : 'Error while saving.'})
-                            } else {
-
-                                res.json({
-                                    success : true,
-                                    message : 'Requests accepted.'
-                                })
-                            }
-                        });
-                    }
-                });
-
-            }
-        })
-    });
-
-    // get accepted request
-    router.get('/searchAccepted', function (req, res) {
-
-        Cookedfood.find({ acceptedby : req.decoded.username }, function (err, cook) {
-            if(err) {
-                throw err;
-            } else {
-                Rawitems.find({ acceptedby : req.decoded.username }, function (err, raw) {
-                    if(err) {
-                        throw err;
-                    } else {
-                        res.json({
-                            success : true,
-                            cook : cook,
-                            raw : raw
-                        });
-                    }
-                });
-            }
-        });
-    });
-
-    // Add to Cart
-    router.post('/addtocart/:id',function(req,res){
-
-        User.findOne({ username : req.decoded.username }, function (err, user) {
-            if(err){
-                throw err;
-            }
-            else if(!user){
-                res.json({ success:false,message:'User not found' });
-            }
-            else {
-
-                Product.findOne({ _id : req.params.id}, function (err, item) {
-                    if(err) {
-                        throw err;
-                    } else if(!item) {
-                        res.json({
-                            success : false
-                        });
-                    } else {
-                        var cartObj = {};
-                        cartObj.itemid = req.params.id;
-                        cartObj.count = 1;
-                        cartObj.name = item.name;
-                        cartObj.price = item.price;
-                        cartObj.tag = item.tag;
-
-                        //console.log('id from api ' + req.body);
-
-                        user.cart.push(cartObj);
-
-                        //console.log(user.cart);
-
-                        user.save(function (err) {
-                            if(err){
-                                res.json({success:false,message:'Not added to cart'})
-                            }
-                            else{
-                                res.json({success:true,message:'Successfully added to cart !!',item : cartObj});
-                            }
-                        })
-                    }
-                });
-            }
-        })
-
-    });
-
-    router.get('/cart',function(req,res){
-
-        User.findOne({ username : req.decoded.username }, function (err, user) {
-            if(err){
-                throw err;
-            }
-            else if(!user){
-                res.json({ success:false,message:'User not found' });
-            }
-            else {
-
-                var value = 0;
-
-                for(var i=0;i<user.cart.length; i++) {
-                    //console.log(user.cart[i].price)
-                    if(user.cart[i].price) {
-                        value = value + user.cart[i].price;
-                    }
-                    //
-                    //console.log(value);
+            try {
+                const locationData = await geocoding.geocodeAddress(food.address, food.city, food.state);
+                food.location = {
+                    latitude: locationData.latitude,
+                    longitude: locationData.longitude
+                };
+                if (!food.address && locationData.formattedAddress) {
+                    food.address = locationData.formattedAddress;
                 }
-
-                res.json({
-                    success : true,
-                    cart : user.cart,
-                    value : value
-                });
-
+            } catch (geocodeErr) {
+                
             }
-        });
+
+            await food.save();
+            return res.json({ status: 'ok', payload: { message: 'Donate request successfully posted. We will contact you soon' } });
+        } catch (err) {
+            return res.json({ status: 'error', payload: { message: 'Error in saving the data to the database: ' + err.message } });
+        }
     });
 
-    // router to clear cart
-    router.post('/clearcart', function (req, res) {
-        User.findOne({ username : req.decoded.username}, function (err, user) {
-            if(err) {
-                throw err;
-            } if(!user) {
-                console.log('User not found.')
+    
+    router.post('/v1/members/donateCookedFood', async (req, res) => {
+        try {
+            const { meal, people, city, state, expiryDate, address } = req.body;
+            
+            if (!meal || !people || !city || !state) {
+                return res.json({ status: 'error', payload: { message: 'Please ensure you fill all details.' } });
+            }
+
+            const cookedfood = new Cookedfood({
+                meal,
+                people,
+                city,
+                state,
+                postedby: req.decoded.username
+            });
+            
+            if (expiryDate) cookedfood.expiryDate = new Date(expiryDate);
+            if (address) cookedfood.address = address;
+            
+            try {
+                const locationData = await geocoding.geocodeAddress(cookedfood.address, cookedfood.city, cookedfood.state);
+                cookedfood.location = {
+                    latitude: locationData.latitude,
+                    longitude: locationData.longitude
+                };
+                if (!cookedfood.address && locationData.formattedAddress) {
+                    cookedfood.address = locationData.formattedAddress;
+                }
+            } catch (geocodeErr) {
+                
+            }
+
+            await cookedfood.save();
+            return res.json({ status: 'ok', payload: { message: 'Donate Request successfully posted.' } });
+        } catch (err) {
+            return res.json({ status: 'error', payload: { message: 'Error in saving the data to the database: ' + err.message } });
+        }
+    });
+
+    router.get('/v1/members/donaterequests', async (req, res) => {
+        try {
+            const institute = new User();
+            const raw = await Rawitems.find({ requeststatus: false });
+            const food = await Cookedfood.find({ requeststatus: false });
+
+            return res.json({ status: 'ok', payload: { user: raw, food: food, institute: institute } });
+        } catch (err) {
+            return res.json({ status: 'error', payload: { message: 'We encountered an issue retrieving the donation requests.' } });
+        }
+    });
+
+    router.get('/v1/members/readdonaterequest/:id', async (req, res) => {
+        try {
+            let food = await Rawitems.findOne({ _id: req.params.id });
+            if (!food) {
+                food = await Cookedfood.findOne({ _id: req.params.id });
+                if (!food) {
+                    return res.json({ status: 'error', payload: { message: 'The requested food item could not be located.' } });
+                }
+            }
+
+            const user = await User.findOne({ username: food.postedby });
+            if (!user) {
+                return res.json({ status: 'error', payload: { message: 'We could not locate that user profile.' } });
+            }
+
+            return res.json({ status: 'ok', payload: { user, food } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
+    });
+
+    
+    router.put('/v1/members/accept/:id', async (req, res) => {
+        try {
+            const user = await User.findOne({ username: req.decoded.username });
+            if (!user) {
+                return res.json({ status: 'error', payload: { message: 'We could not locate that user profile.' } });
+            }
+
+            let raw = await Rawitems.findOne({ _id: req.params.id });
+            if (!raw) {
+                let cook = await Cookedfood.findOne({ _id: req.params.id });
+                if (!cook) {
+                    return res.json({ status: 'error', payload: { message: 'Food item not found' } });
+                }
+                
+                cook.requeststatus = true;
+                cook.acceptedby = req.decoded.username;
+                await cook.save();
             } else {
+                raw.requeststatus = true;
+                raw.acceptedby = req.decoded.username;
+                await raw.save();
+            }
+
+            return res.json({ status: 'ok', payload: { message: 'You have successfully accepted the request.' } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
+    });
+
+    
+    router.get('/v1/members/searchAccepted', async (req, res) => {
+        try {
+            const cook = await Cookedfood.find({ acceptedby: req.decoded.username });
+            const raw = await Rawitems.find({ acceptedby: req.decoded.username });
+
+            return res.json({ status: 'ok', payload: { cook, raw } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
+    });
+
+    
+    router.post('/v1/members/addtocart/:id', async (req, res) => {
+        try {
+            const user = await User.findOne({ username: req.decoded.username });
+            if (!user) {
+                return res.json({ status: 'error', payload: { message: 'We could not locate that user profile.' } });
+            }
+
+            const item = await Product.findOne({ _id: req.params.id });
+            if (!item) {
+                return res.json({ status: 'error', payload: { message: 'That product could not be found.' } });
+            }
+
+            const cartObj = {
+                itemid: req.params.id,
+                count: 1,
+                name: item.name,
+                price: item.price,
+                tag: item.tag
+            };
+
+            user.cart.push(cartObj);
+            await user.save();
+
+            return res.json({ status: 'ok', payload: { message: 'Item added to your cart successfully!', item: cartObj } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
+    });
+
+    router.get('/v1/members/cart', async (req, res) => {
+        try {
+            const user = await User.findOne({ username: req.decoded.username });
+            if (!user) {
+                return res.json({ status: 'error', payload: { message: 'We could not locate that user profile.' } });
+            }
+
+            let value = 0;
+            for (let i = 0; i < user.cart.length; i++) {
+                if (user.cart[i].price) {
+                    value += user.cart[i].price;
+                }
+            }
+
+            return res.json({ status: 'ok', payload: { cart: user.cart, value } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
+    });
+
+    
+    router.post('/v1/members/clearcart', async (req, res) => {
+        try {
+            const user = await User.findOne({ username: req.decoded.username });
+            if (!user) {
+                return res.json({ status: 'error', payload: { message: 'That user profile does not exist.' } });
+            }
+
+            user.cart = [];
+            await user.save();
+            return res.json({ status: 'ok', payload: { message: 'Your cart has been completely cleared.' } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
+    });
+
+    router.post('/v1/contribute/confirm', async (req, res) => {
+        try {
+            const user = await User.findOne({ username: req.decoded.username });
+            if (user) {
                 user.cart = [];
-
-                user.save(function (err) {
-                    if(err) {
-                        throw err;
-                    } else {
-                        console.log('User cart cleared successfully.');
-                    }
-                });
+                await user.save();
             }
-        });
-    });
-
-    // remove item from cart
-    router.post('/removeitem/:id', function (req, res) {
-
-        User.findOne({ username : req.decoded.username }, function (err, user) {
-            if(err) {
-                throw err;
-            } else if(!user) {
-                res.json({
-                    succcess : false,
-                    message : 'User not found.'
-                });
-            } else {
-                //console.log(user.cart);
-
-                for(var i=0;i<user.cart.length;i++) {
-                    //console.log(user.cart[i]._id);
-                    //console.log(req.params.id);
-                    if(user.cart[i]._id == req.params.id) {
-
-                        user.cart.splice(i,1);
-                        //console.log(user.cart);
-                        break;
-
-                    }
-                }
-
-                user.save(function (err) {
-                    if(err) {
-                        res.json({
-                            success : false,
-                            message : 'Error while saving user.'
-                        })
-                    } else {
-                        res.json({
-                            success : true,
-                            message : 'Removed item from Cart.'
-                        });
-                    }
-                })
-
-
-            }
-        })
-    });
-
-    //Add new product
-    router.post('/addnewproduct',function(req,res){
-
-        var product = Product();
-        product.name = req.body.name;
-        product.price = req.body.price;
-        product.quantity = req.body.quantity;
-        product.tag = req.body.tag;
-
-        if(req.body.name == null || req.body.name == '' || req.body.price == null || req.body.price == '' || req.body.quantity == null || req.body.quantity == '' || req.body.tag == null || req.body.tag == ''){
-            res.json({success : false, message : 'Make sure all fields are provided'});
-        }
-        else{
-            product.save(function(err){
-                if(err){
-                    throw err;
-                }
-                else {
-                    res.json({success : true, message : 'Product successfully added to cart'});
-                }
-            })
+            return res.json({ status: 'ok', payload: { message: 'Contribution confirmed successfully!' } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
         }
     });
 
-    //Buy and Donate
-    router.get('/displayproduct',function(req,res){
-       Product.find().exec(function(err,item){
-           if(err){
-               throw err;
-           }
-           else{
-               res.json({success : true , item : item});
-           }
-       })
+    
+    router.post('/v1/members/removeitem/:id', async (req, res) => {
+        try {
+            const user = await User.findOne({ username: req.decoded.username });
+            if (!user) {
+                return res.json({ status: 'error', payload: { message: 'That user profile does not exist.' } });
+            }
+
+            for (let i = 0; i < user.cart.length; i++) {
+                if (user.cart[i]._id == req.params.id) {
+                    user.cart.splice(i, 1);
+                    break;
+                }
+            }
+
+            await user.save();
+            return res.json({ status: 'ok', payload: { message: 'The item has been removed from your cart.' } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
     });
 
-    //Display all donators
-    router.get('/donators',function(req,res){
-        User.find({role:'donator'},function(err,user){
-            res.json({success:true,user:user});
-        })
+    
+    router.post('/v1/members/addnewproduct', async (req, res) => {
+        try {
+            const { name, price, quantity, tag } = req.body;
+
+            if (!name || !price || !quantity || !tag) {
+                return res.json({ status: 'error', payload: { message: 'Please ensure all required fields are filled out.' } });
+            }
+
+            const product = new Product({ name, price, quantity, tag });
+            await product.save();
+
+            return res.json({ status: 'ok', payload: { message: 'The product was added to your cart successfully.' } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
     });
 
-    router.get('/receivers',function(req,res){
-        User.find({role:'receiver'},function(err,user){
-            res.json({success:true,user:user});
-        })
+    
+    router.get('/v1/members/displayproduct', async (req, res) => {
+        try {
+            const item = await Product.find();
+            return res.json({ status: 'ok', payload: { item } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
     });
 
-    router.get('/volunteers',function(req,res){
-        User.find({role:'volunteer'},function(err,user){
-            res.json({success:true,user:user});
-        })
+    
+    router.get('/v1/members/donators', async (req, res) => {
+        try {
+            const user = await User.find({ role: 'donator' });
+            return res.json({ status: 'ok', payload: { user } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
     });
 
+    router.get('/v1/members/receivers', async (req, res) => {
+        try {
+            const user = await User.find({ role: 'receiver' });
+            return res.json({ status: 'ok', payload: { user } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
+    });
 
-	return router;
+    router.get('/v1/members/volunteers', async (req, res) => {
+        try {
+            const user = await User.find({ role: 'volunteer' });
+            return res.json({ status: 'ok', payload: { user } });
+        } catch (err) {
+            return res.status(500).json({ status: 'error', payload: { message: err.message || "Server error" } });
+        }
+    });
+
+    return router;
 };
-

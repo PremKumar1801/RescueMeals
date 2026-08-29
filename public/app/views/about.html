@@ -1,20 +1,117 @@
-<div style="margin-top: 120px;">
+<div class="container" ng-controller="DonateRequestsManager as donaterequests">
 
-    <h2 style="font-size: 40px; color: red;">About Us</h2>
-  <h3><p>Welcome to our food reuse website, where we connect generous donors with those in need. Our mission is to reduce food waste and fight hunger by redistributing excess food to the ones who need it the most.</p></h3>
+    <!-- About Hero Section -->
+    <section class="glass-panel text-center" style="margin-top: 2rem; padding: 4.5rem 3rem;">
+        <span class="rm-badge"><i class="glyphicon glyphicon-info-sign"></i> About RescueMeals</span>
+        <h1 style="font-size: 4.2rem; font-weight: 700; color: var(--core-heading); margin: 1.5rem 0 1rem 0;">
+            Our Mission: Eliminating Waste, Feeding Communities
+        </h1>
+        <p style="font-size: 1.8rem; color: var(--core-text-muted); max-width: 740px; margin: 0 auto; line-height: 1.6;">
+            RescueMeals is a dedicated humanitarian platform built to redirect high-quality surplus food from commercial kitchens, markets, and households to local families, shelters, and community centers.
+        </p>
+    </section>
 
-  <h2 style="color: red;">Our Motto</h2>
-  <blockquote class="quote" style="color: white;">"Let's turn surplus into sustenance, together!"</blockquote>
+    <!-- Step-by-Step Sequence -->
+    <section class="glass-panel" style="padding: 4rem 3rem;">
+        <div class="rm-section-header text-center">
+            <span class="rm-badge">Step-by-Step Sequence</span>
+            <h2>How RescueMeals Connects Food Sources</h2>
+            <p>From kitchen surplus to community table in three safe, transparent steps.</p>
+        </div>
 
-  
-  <div class="developer-details" >
-    <h6 style="color: antiquewhite;"><p>Developed by:</p>
-        <p>Arpit Jaswal</p>
-        <p>iamarpitjaswal@gmail.com</p>
-        <p>Winter Internship Project 2023</p>
-    </h6>
-  </div>
+        <div class="row" style="position: relative;">
+            <div class="col-md-4 col-sm-12" style="margin-bottom: 2.5rem;">
+                <div style="background: rgba(31, 46, 36, 0.5); border: 1px solid rgba(232, 237, 233, 0.12); border-radius: var(--core-radius-lg); padding: 3rem 2.4rem; height: 100%; position: relative;">
+                    <span style="font-size: 4rem; font-weight: 800; color: rgba(212, 168, 83, 0.25); position: absolute; top: 1.5rem; right: 2rem; font-family: var(--core-font-heading);">
+                        01
+                    </span>
+                    <h3 style="font-size: 2.4rem; color: var(--core-heading); margin: 0 0 1.2rem 0;">
+                        1. Surplus Identification
+                    </h3>
+                    <p style="font-size: 1.5rem; color: var(--core-text-muted); line-height: 1.6;">
+                        Generous donors, restaurants, and food distributors list excess cooked meals or raw grocery ingredients on our real-time platform with quantity, location, and freshness windows.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-12" style="margin-bottom: 2.5rem;">
+                <div style="background: rgba(31, 46, 36, 0.5); border: 1px solid rgba(232, 237, 233, 0.12); border-radius: var(--core-radius-lg); padding: 3rem 2.4rem; height: 100%; position: relative;">
+                    <span style="font-size: 4rem; font-weight: 800; color: rgba(212, 168, 83, 0.25); position: absolute; top: 1.5rem; right: 2rem; font-family: var(--core-font-heading);">
+                        02
+                    </span>
+                    <h3 style="font-size: 2.4rem; color: var(--core-heading); margin: 0 0 1.2rem 0;">
+                        2. Verified Claiming
+                    </h3>
+                    <p style="font-size: 1.5rem; color: var(--core-text-muted); line-height: 1.6;">
+                        Verified receivers, local shelters, and active volunteers browse open listings in their city, claim items, and coordinate immediate pickup details cleanly.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-12" style="margin-bottom: 2.5rem;">
+                <div style="background: rgba(31, 46, 36, 0.5); border: 1px solid rgba(232, 237, 233, 0.12); border-radius: var(--core-radius-lg); padding: 3rem 2.4rem; height: 100%; position: relative;">
+                    <span style="font-size: 4rem; font-weight: 800; color: rgba(212, 168, 83, 0.25); position: absolute; top: 1.5rem; right: 2rem; font-family: var(--core-font-heading);">
+                        03
+                    </span>
+                    <h3 style="font-size: 2.4rem; color: var(--core-heading); margin: 0 0 1.2rem 0;">
+                        3. Safe Redistribution
+                    </h3>
+                    <p style="font-size: 1.5rem; color: var(--core-text-muted); line-height: 1.6;">
+                        Meals are picked up and distributed adhering to hygiene guidelines, ensuring good food fulfills its ultimate purpose: sustaining people in need.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Belief & Impact Summary -->
+    <section class="glass-panel" style="padding: 4rem 3rem;">
+        <div class="row">
+            <div class="col-md-6" style="margin-bottom: 2rem;">
+                <h3 style="font-size: 2.6rem; color: var(--core-accent); margin-top: 0;">Our Core Belief</h3>
+                <blockquote style="background: rgba(12, 20, 16, 0.5); border-left: 4px solid var(--core-accent); padding: 2rem; border-radius: 0 var(--core-radius-md) var(--core-radius-md) 0; color: var(--core-heading); font-size: 1.8rem; font-style: italic;">
+                    "Let's turn surplus into sustenance, together! Every meal saved is a step toward hunger eradication and environmental care."
+                </blockquote>
+                <p style="font-size: 1.5rem; color: var(--core-text-muted); line-height: 1.6;">
+                    RescueMeals was designed to bridge logistical gaps between food abundance and food scarcity. By giving donors a fast, reliable avenue to share extra food, we reduce environmental emissions and build stronger local safety nets.
+                </p>
+            </div>
+
+            <div class="col-md-6" style="margin-bottom: 2rem;">
+                <h3 style="font-size: 2.6rem; color: var(--core-heading); margin-top: 0;">Impact Overview</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                    <div class="rm-stat-card">
+                        <div class="rm-stat-value">{{ donaterequests.stats.totalRescues || 12 }}</div>
+                        <div class="rm-stat-label">Rescues Posted</div>
+                    </div>
+                    <div class="rm-stat-card">
+                        <div class="rm-stat-value">{{ donaterequests.stats.citiesCovered || 5 }}</div>
+                        <div class="rm-stat-label">Active Cities</div>
+                    </div>
+                    <div class="rm-stat-card">
+                        <div class="rm-stat-value">{{ donaterequests.stats.cookedMeals || 8 }}</div>
+                        <div class="rm-stat-label">Cooked Batches</div>
+                    </div>
+                    <div class="rm-stat-card">
+                        <div class="rm-stat-value">{{ donaterequests.stats.rawItems || 4 }}</div>
+                        <div class="rm-stat-label">Raw Batches</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Closing CTA -->
+        <div class="text-center" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(232, 237, 233, 0.1);">
+            <h3 style="font-size: 2.4rem; color: var(--core-heading); margin-bottom: 1.5rem;">Ready to make an impact?</h3>
+            <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+                <a href="/explore" class="btn-rm-primary">
+                    <i class="glyphicon glyphicon-search"></i> Browse Food Rescues
+                </a>
+                <a href="/signup" ng-show="!main.isLoggedIn" class="btn-rm-secondary">
+                    <i class="glyphicon glyphicon-user"></i> Sign Up Today
+                </a>
+            </div>
+        </div>
+    </section>
 
 </div>
-
-  

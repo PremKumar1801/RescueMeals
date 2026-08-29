@@ -2,13 +2,13 @@
 <style>
     label {
         font-size: 16px;
-        color: white;
+        color: var(--core-text);
         margin-left: 1vh;
     }
 </style>
 
 <div class="text-center">
-    <h1 class="page-heading">Add New Product</h1>
+    <h1 class="page-heading">List New Item</h1>
 </div>
 <div class="row show-hide message" ng-show="product.successMsg">
     <div class="alert alert-success">{{product.successMsg}}</div>
@@ -28,7 +28,7 @@
         <input class="form-control" type="number" name="quantity" placeholder="Enter the quantity" ng-model="product.Data.quantity"><br>
         <label>Category :</label>
         <input class="form-control" type="text" name="category" placeholder="Enter the category of product" ng-model="product.Data.tag"><br>
-        <button type="submit" class="btn-success">Submit</button>
+        <button type="submit" class="btn btn-rm-primary">Confirm</button>
     </form>
     <br>
     <div class="jumbotron text-center" ng-show="main.loading">

@@ -242,6 +242,6 @@ This project does not currently specify a license. Consider adding a `LICENSE` f
 ## 👤 Author
 
 ```
-Name: Your Name
-GitHub: Your GitHub Profile
+Name: Prem Kumar
+GitHub: https://github.com/PremKumar1801
 ```
